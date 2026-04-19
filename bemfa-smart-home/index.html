@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阳光智网 - 多模式智能低压绿色微网</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="grid-lines"></div>
+
+    <div class="container">
+        <!-- ========== 顶部导航栏 ========== -->
+        <nav class="top-nav">
+            <div class="logo-section">
+                <div class="logo">☀️</div>
+                <div class="logo-text">
+                    <h1>阳光智网</h1>
+                    <p>多模式智能低压绿色微网</p>
+                </div>
+            </div>
+            <div class="nav-menu">
+                <a href="#overview" class="nav-item"><span>📊</span> 系统概览</a>
+                <a href="#monitor" class="nav-item"><span>📈</span> 实时监控</a>
+                <a href="#bafa-devices" class="nav-item"><span>🔌</span> 继电器控制</a>
+                <a href="#battery" class="nav-item"><span>🔋</span> 太阳能/储能</a>
+                <a href="#analysis" class="nav-item"><span>📉</span> 节能分析</a>
+                <a href="#logs" class="nav-item"><span>📋</span> 操作日志</a>
+            </div>
+        </nav>
+
+        <!-- ========== 系统状态栏 ========== -->
+        <div class="status-header">
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-icon">☀️</div>
+                    <div class="status-info">
+                        <h3>阳光智网</h3>
+                        <p><span class="status-dot"></span>设备在线</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">📡</div>
+                    <div class="status-info">
+                        <h3>WiFi 状态</h3>
+                        <p><span class="status-dot"></span>已连接</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">🌐</div>
+                    <div class="status-info">
+                        <h3>MQTT 状态</h3>
+                        <p><span class="status-dot"></span>已连接</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">💻</div>
+                    <div class="status-info">
+                        <h3>芯片状态</h3>
+                        <p><span class="status-dot"></span>在线</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">⚙️</div>
+                    <div class="status-info">
+                        <h3>ARM 状态</h3>
+                        <p><span class="status-dot"></span>在线</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">🔌</div>
+                    <div class="status-info">
+                        <h3>8路输出状态</h3>
+                        <p><span class="status-dot"></span><span id="activeChannels">0</span>路活跃</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">📊</div>
+                    <div class="status-info">
+                        <h3>当前总能耗</h3>
+                        <p><span id="systemLoad">0</span> W</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">🤖</div>
+                    <div class="status-info">
+                        <h3>当前模式</h3>
+                        <p><span id="currentMode">自动节能模式</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 系统概览 ========== -->
+        <div id="overview" class="section">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <div class="section-title">
+                    <h2>系统数据概览</h2>
+                    <p>实时监测系统关键数据与节能效果</p>
+                </div>
+            </div>
+
+            <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 2px solid #ecf0f1;">
+                <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 20px;">
+                    <span>📈</span> 能源数据趋势
+                </h3>
+                <div style="height: 300px;">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="data-card">
+                    <div class="data-icon">☀️</div>
+                    <div class="data-label">当前太阳能功率</div>
+                    <div class="data-value"><span id="solarPower">0</span><span class="data-unit">W</span></div>
+                    <div class="data-subtitle">☀️ 光照强度：实时同步</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">🔋</div>
+                    <div class="data-label">电池SOC</div>
+                    <div class="data-value"><span id="batterySoc">0</span><span class="data-unit">%</span></div>
+                    <div class="data-subtitle">电池电压：<span id="batteryVoltage">0.0</span>V</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">🔌</div>
+                    <div class="data-label">8路输出状态</div>
+                    <div class="data-value"><span id="activeChannelsOverview">0</span><span class="data-unit">路活跃</span></div>
+                    <div class="data-subtitle">总负载：<span id="totalLoad">0</span>W</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">🤖</div>
+                    <div class="data-label">自动策略</div>
+                    <div class="data-value"><span id="autoStrategy">已启用</span></div>
+                    <div class="data-subtitle">待机断电 + 储能联动</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">💰</div>
+                    <div class="data-label">今日节省电量</div>
+                    <div class="data-value"><span id="totalSaved">0.0</span><span class="data-unit">kWh</span></div>
+                    <div class="data-subtitle">绿电替代 + 待机节电</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">🌱</div>
+                    <div class="data-label">累计碳减排</div>
+                    <div class="data-value"><span id="carbonReduction">0.0</span><span class="data-unit">kg</span></div>
+                    <div class="data-subtitle">🌳 等效植树 <span id="treeEquiv">0.00</span> 棵</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">📅</div>
+                    <div class="data-label">数据更新时间</div>
+                    <div class="data-value"><span id="updateTime">--</span></div>
+                    <div class="data-subtitle">实时数据同步中</div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-icon">⏱️</div>
+                    <div class="data-label">系统运行时长</div>
+                    <div class="data-value"><span id="uptime">0</span><span class="data-unit">小时</span></div>
+                    <div class="data-subtitle">连续稳定运行中</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 实时监控 ========== -->
+        <div id="monitor" class="section">
+            <div class="section-header">
+                <div class="section-icon">📈</div>
+                <div class="section-title">
+                    <h2>实时监控大屏</h2>
+                    <p>实时监测系统状态与设备运行情况</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="status-card"><div class="status-icon">📡</div><div class="status-info"><h3>WiFi 状态</h3><p><span class="status-dot"></span>已连接</p></div></div>
+                <div class="status-card"><div class="status-icon">🌐</div><div class="status-info"><h3>MQTT 状态</h3><p><span class="status-dot"></span>已连接</p></div></div>
+                <div class="status-card"><div class="status-icon">💻</div><div class="status-info"><h3>MCU2 状态</h3><p><span class="status-dot"></span>在线</p></div></div>
+                <div class="status-card"><div class="status-icon">⚙️</div><div class="status-info"><h3>ARM 状态</h3><p><span class="status-dot"></span>在线</p></div></div>
+            </div>
+
+            <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 20px;"><span>🔌</span> AC 电流监测</h3>
+            <div class="terminals-grid">
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔌</span> AC1 <span class="terminal-badge">CZ1006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac1-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔌</span> AC2 <span class="terminal-badge">CZ2006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac2-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔌</span> AC3 <span class="terminal-badge">CZ3006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac3-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔌</span> AC4 <span class="terminal-badge">CZ4006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac4-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+            </div>
+
+            <h3 style="font-size: 18px; color: #2c3e50; margin: 30px 0 20px;"><span>🔋</span> Type-C 电流监测</h3>
+            <div class="terminals-grid">
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔋</span> TC1 <span class="terminal-badge">DC2006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc1-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔋</span> TC2 <span class="terminal-badge">DC3006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc2-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔋</span> TC3 <span class="terminal-badge">DC4006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc3-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+                <div class="terminal-card"><div class="terminal-header"><div class="terminal-name"><span>🔋</span> TC4 <span class="terminal-badge">DC5006</span></div></div><div class="terminal-data"><div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc4-current">0.00</span><span class="terminal-data-unit">A</span></div></div></div></div>
+            </div>
+
+            <h3 style="font-size: 18px; color: #2c3e50; margin: 30px 0 20px;"><span>☀️</span> 太阳能/储能状态</h3>
+            <div class="battery-grid">
+                <div class="battery-card">
+                    <div class="battery-info">
+                        <div class="battery-info-item"><div class="battery-info-label">SOC</div><div class="battery-info-value"><span id="soc-value">0</span>%</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">电池电压</div><div class="battery-info-value"><span id="bat-value">0.0</span>V</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">充电电流</div><div class="battery-info-value"><span id="chgi-value">0.00</span>A</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">光伏电压</div><div class="battery-info-value"><span id="pvv-value">0.0</span>V</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">光伏电流</div><div class="battery-info-value"><span id="pvi-value">0.00</span>A</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">充电功率</div><div class="battery-info-value"><span id="cpp-value">0</span>W</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 巴法云设备控制与策略配置 ========== -->
+        <div id="bafa-devices" class="section">
+            <div class="section-header">
+                <div class="section-icon">☁️</div>
+                <div class="section-title">
+                    <h2>巴法云设备控制与策略配置</h2>
+                    <p>远程控制设备并配置待机断电策略</p>
+                </div>
+            </div>
+
+            <div class="terminals-grid">
+                <!-- AC1 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔌</span> AC1 <span class="terminal-badge">CZ1006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('AC1','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('AC1','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-cz1006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac1-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="ac1-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="ac1-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="ac1-current-threshold" value="0.05" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="ac1-duration" value="120" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="ac1-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                 <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="ac1-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="ac1-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="ac1-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac1-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="ac1-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac1-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="ac1-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac1-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('AC1')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('AC1')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- AC2 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔌</span> AC2 <span class="terminal-badge">CZ2006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('AC2','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('AC2','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-cz2006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac2-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="ac2-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="ac2-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="ac2-current-threshold" value="0.05" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="ac2-duration" value="120" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="ac2-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                      <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="ac2-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="ac2-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="ac2-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac2-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="ac2-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac2-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="ac2-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac2-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('AC2')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('AC2')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- AC3 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔌</span> AC3 <span class="terminal-badge">CZ3006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('AC3','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('AC3','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-cz3006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac3-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="ac3-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="ac3-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="ac3-current-threshold" value="0.05" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="ac3-duration" value="120" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="ac3-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                       <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="ac3-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="ac3-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="ac3-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac3-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="ac3-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac3-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="ac3-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac3-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('AC3')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('AC3')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- AC4 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔌</span> AC4 <span class="terminal-badge">CZ4006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('AC4','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('AC4','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-cz4006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="ac4-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="ac4-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="ac4-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="ac4-current-threshold" value="0.05" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="ac4-duration" value="120" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="ac4-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                       <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="ac4-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="ac4-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="ac4-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac4-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="ac4-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac4-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="ac4-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="ac4-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('AC4')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('AC4')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- TC1 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔋</span> TC1 <span class="terminal-badge">DC2006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('TC1','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('TC1','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-dc2006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc1-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="tc1-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="tc1-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="tc1-current-threshold" value="0.08" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="tc1-duration" value="180" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="tc1-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                       <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="tc1-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="tc1-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="tc1-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc1-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="tc1-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc1-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="tc1-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc1-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('TC1')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('TC1')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- TC2 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔋</span> TC2 <span class="terminal-badge">DC3006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('TC2','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('TC2','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-dc3006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc2-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="tc2-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="tc2-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="tc2-current-threshold" value="0.08" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="tc2-duration" value="180" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="tc2-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                       <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="tc2-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="tc2-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="tc2-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc2-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="tc2-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc2-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="tc2-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc2-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('TC2')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('TC2')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- TC3 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔋</span> TC3 <span class="terminal-badge">DC4006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('TC3','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('TC3','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-dc4006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc3-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="tc3-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="tc3-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="tc3-current-threshold" value="0.08" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="tc3-duration" value="180" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="tc3-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                        <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="tc3-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="tc3-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="tc3-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc3-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="tc3-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc3-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="tc3-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc3-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('TC3')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('TC3')">保存策略</button>
+</div>
+                    </div>
+                </div>
+
+                <!-- TC4 -->
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-name"><span>🔋</span> TC4 <span class="terminal-badge">DC5006</span></div>
+                        <div class="terminal-actions">
+                            <button class="btn-on" onclick="controlDevice('TC4','on')">开启</button>
+                            <button class="btn-off" onclick="controlDevice('TC4','off')">关闭</button>
+                        </div>
+                    </div>
+                    <div class="terminal-data">
+                        <div class="terminal-data-item"><div class="terminal-data-label">状态</div><div class="terminal-data-value" id="bafa-dc5006-status" style="color:#999;">离线</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">实时电流</div><div class="terminal-data-value"><span id="tc4-current-display">0.00</span> A</div></div>
+                        <div class="terminal-data-item"><div class="terminal-data-label">待机倒计时</div><div class="terminal-data-value"><span id="tc4-countdown">0</span> 秒</div></div>
+                    </div>
+                    <div style="margin-top:15px;padding:10px;background:#f8f9fa;border-radius:8px;">
+                        <h5 style="font-size:13px;color:#2c3e50;margin-bottom:10px;">待机断电配置</h5>
+                        <div class="setting-item"><input type="checkbox" id="tc4-standby-enabled"><label style="font-size:12px;">启用自动断电</label></div>
+                        <div class="setting-item"><label style="font-size:12px;">电流阈值：</label><input type="number" id="tc4-current-threshold" value="0.08" min="0.01" max="1" step="0.01" style="width:60px;font-size:12px;"><span style="font-size:12px;">A</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">持续时间：</label><input type="number" id="tc4-duration" value="180" min="10" max="300" step="10" style="width:60px;font-size:12px;"><span style="font-size:12px;">秒</span></div>
+                        <div class="setting-item"><label style="font-size:12px;">动作：</label><select id="tc4-action" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;"><option value="turn_off">自动关闭</option><option value="alert">仅提醒</option></select></div>
+                       <div class="setting-item">
+    <label style="font-size:12px;">恢复方式：</label>
+    <select id="tc4-recovery-mode" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px;">
+        <option value="manual">手动恢复</option>
+        <option value="timer">时间段恢复</option>
+        <option value="cloud">云端控制</option>
+    </select>
+</div>
+
+<div id="tc4-recovery-time-group" style="margin-top:8px;">
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段1：</label>
+        <input type="time" id="tc4-recovery-start-1" value="12:20" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc4-recovery-end-1" value="12:30" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段2：</label>
+        <input type="time" id="tc4-recovery-start-2" value="17:50" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc4-recovery-end-2" value="18:00" style="font-size:12px;">
+    </div>
+    <div class="setting-item">
+        <label style="font-size:12px;">恢复时段3：</label>
+        <input type="time" id="tc4-recovery-start-3" value="20:30" style="font-size:12px;">
+        <span style="font-size:12px;">~</span>
+        <input type="time" id="tc4-recovery-end-3" value="20:40" style="font-size:12px;">
+    </div>
+</div>
+
+<div style="display:flex;gap:8px;margin-top:10px;">
+    <button class="btn-on" onclick="restoreDevice('TC4')">手动恢复</button>
+    <button class="btn-off" onclick="StrategyConfigManager.syncDeviceConfig('TC4')">保存策略</button>
+</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-card" style="margin-top:25px;">
+                <h3><span>☀️</span> 太阳能/储能联动策略</h3>
+                <div style="display:flex;flex-direction:column;gap:15px;">
+                    <div class="setting-item"><input type="checkbox" id="soc-low-enabled"><label>SOC 低于 20% 时关闭 AC3、AC4</label></div>
+                    <div class="setting-item"><input type="checkbox" id="bat-low-enabled"><label>BAT 低于 11.8V 时只保留 TC1</label></div>
+                    <div class="setting-item"><input type="checkbox" id="pv-low-enabled"><label>PVV 低于 10V 且 CHGI 低于 0.2A 持续 5 分钟时推送提醒</label></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 太阳能/储能状态 ========== -->
+        <div id="battery" class="section">
+            <div class="section-header">
+                <div class="section-icon">🔋</div>
+                <div class="section-title">
+                    <h2>太阳能/储能状态</h2>
+                    <p>实时监控太阳能发电与电池状态</p>
+                </div>
+            </div>
+
+            <div class="battery-grid">
+                <div class="battery-card">
+                    <h3 style="font-size:18px;color:#2c3e50;margin-bottom:20px;"><span>☀️</span> 太阳能/储能状态</h3>
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+                        <div class="battery-info-item"><div class="battery-info-label">SOC</div><div class="battery-info-value"><span id="battery-soc-live">0</span>%</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">电池电压</div><div class="battery-info-value"><span id="battery-bat-live">0.0</span>V</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">充电电流</div><div class="battery-info-value"><span id="battery-chgi-live">0.00</span>A</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">光伏电压</div><div class="battery-info-value"><span id="battery-pvv-live">0.0</span>V</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">光伏电流</div><div class="battery-info-value"><span id="battery-pvi-live">0.00</span>A</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">充电功率</div><div class="battery-info-value"><span id="battery-cpp-live">0</span>W</div></div>
+                    </div>
+                </div>
+
+                <div class="battery-card">
+                    <h3 style="font-size:18px;color:#2c3e50;margin-bottom:20px;"><span>📊</span> 电池状态监控</h3>
+                    <div class="battery-visual">
+                        <div class="battery-icon-container">
+                            <div class="battery-icon">🔋</div>
+                            <div class="battery-percentage" id="batteryPercentDisplay">0%</div>
+                        </div>
+                        <div class="battery-bar">
+                            <div class="battery-fill" id="batteryFill" style="width:0%;">0%</div>
+                        </div>
+                    </div>
+                    <div class="battery-info" style="margin-top:20px;">
+                        <div class="battery-info-item"><div class="battery-info-label">SOC</div><div class="battery-info-value"><span id="batterySocDisplay">0</span>%</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">电池电压</div><div class="battery-info-value"><span id="batteryVoltageDisplay">0.0</span>V</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">充电电流</div><div class="battery-info-value"><span id="batteryChargeCurrentDisplay">0.00</span>A</div></div>
+                        <div class="battery-info-item"><div class="battery-info-label">充电功率</div><div class="battery-info-value"><span id="batteryChargePowerDisplay">0</span>W</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 节能分析 ========== -->
+        <div id="analysis" class="section">
+            <div class="section-header">
+                <div class="section-icon">📉</div>
+                <div class="section-title">
+                    <h2>节能分析</h2>
+                    <p>分析节电量与碳减排效果</p>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="data-card"><div class="data-icon">💡</div><div class="data-label">今日节电量</div><div class="data-value"><span id="today-saving">0.0</span><span class="data-unit">kWh</span></div></div>
+                <div class="data-card"><div class="data-icon">📅</div><div class="data-label">本周节电量</div><div class="data-value"><span id="week-saving">0.0</span><span class="data-unit">kWh</span></div></div>
+                <div class="data-card"><div class="data-icon">📆</div><div class="data-label">本月节电量</div><div class="data-value"><span id="month-saving">0.0</span><span class="data-unit">kWh</span></div></div>
+                <div class="data-card"><div class="data-icon">📊</div><div class="data-label">累计节电量</div><div class="data-value"><span id="total-saving">0.0</span><span class="data-unit">kWh</span></div></div>
+                <div class="data-card"><div class="data-icon">🌱</div><div class="data-label">碳减排估算</div><div class="data-value"><span id="carbon-reduction">0.0</span><span class="data-unit">kg</span></div></div>
+                <div class="data-card"><div class="data-icon">💰</div><div class="data-label">节省电费</div><div class="data-value"><span id="cost-saving">0.0</span><span class="data-unit">元</span></div></div>
+            </div>
+        </div>
+
+        <!-- ========== 操作日志 ========== -->
+        <div id="logs" class="section">
+            <div class="section-header">
+                <div class="section-icon">📋</div>
+                <div class="section-title">
+                    <h2>操作日志</h2>
+                    <p>记录系统运行状态与操作历史</p>
+                </div>
+            </div>
+
+            <div class="log-filters">
+                <button class="filter-btn active" onclick="filterLogs('all', event)">全部</button>
+                <button class="filter-btn" onclick="filterLogs('info', event)">ℹ️ 信息</button>
+                <button class="filter-btn" onclick="filterLogs('success', event)">✅ 成功</button>
+                <button class="filter-btn" onclick="filterLogs('warning', event)">⚠️ 警告</button>
+                <button class="filter-btn" onclick="filterLogs('error', event)">❌ 错误</button>
+            </div>
+
+            <div class="log-container" id="logContainer">
+                <div class="log-item info">
+                    <div class="log-content">
+                        <span class="log-icon">ℹ️</span>
+                        <span class="log-message">系统启动完成，正在连接巴法云服务器...</span>
+                    </div>
+                    <span class="log-time">--:--:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

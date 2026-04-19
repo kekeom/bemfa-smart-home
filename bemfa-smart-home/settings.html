@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - 智能能源管理系统</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 设置页面特有样式 */
+        .settings-page {
+            padding-bottom: 80px;
+        }
+        
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 24px;
+        }
+        
+        .back-btn {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .settings-group {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-group h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .setting-value {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .setting-arrow {
+            font-size: 16px;
+            color: #999;
+            cursor: pointer;
+        }
+        
+        .setting-slider {
+            width: 100%;
+            margin: 12px 0;
+        }
+        
+        .setting-radio-group {
+            display: flex;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        
+        .setting-radio {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .setting-radio.active {
+            background-color: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+        
+        .device-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .device-info {
+            flex: 1;
+        }
+        
+        .device-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .device-status {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .device-status.online {
+            color: #34c759;
+        }
+        
+        .device-status.offline {
+            color: #ff3b30;
+        }
+        
+        .about-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .about-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="settings-page">
+        <!-- 顶部导航栏 -->
+        <div class="top-nav">
+            <div class="back-btn" onclick="window.location.href='index.html'">←</div>
+            <div class="page-title">系统设置</div>
+            <div style="width: 20px;"></div>
+        </div>
+
+        <!-- 能源参数设置 -->
+        <div class="settings-group">
+            <h3>能源参数设置</h3>
+            <div class="setting-item">
+                <span class="setting-label">碳排放因子设置</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="setting-value">0.5千克二氧化碳每千瓦时</span>
+                    <span class="setting-arrow">›</span>
+                </div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">电价设置</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="setting-value">0.6元每千瓦时</span>
+                    <span class="setting-arrow">›</span>
+                </div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">功率阈值设置</span>
+                <span class="setting-value">400瓦</span>
+            </div>
+            <input type="range" class="setting-slider" min="100" max="800" step="50" value="400">
+        </div>
+
+        <!-- 控制参数设置 -->
+        <div class="settings-group">
+            <h3>控制参数设置</h3>
+            <div class="setting-item">
+                <span class="setting-label">数据刷新频率</span>
+                <span class="setting-value">2秒</span>
+            </div>
+            <div class="setting-radio-group">
+                <div class="setting-radio">1秒</div>
+                <div class="setting-radio active">2秒</div>
+                <div class="setting-radio">5秒</div>
+                <div class="setting-radio">10秒</div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">温度单位</span>
+                <span class="setting-value">摄氏度</span>
+            </div>
+            <div class="setting-radio-group">
+                <div class="setting-radio active">摄氏度</div>
+                <div class="setting-radio">华氏度</div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">日期时间格式</span>
+                <span class="setting-value">24小时制</span>
+            </div>
+            <div class="setting-radio-group">
+                <div class="setting-radio active">24小时制</div>
+                <div class="setting-radio">12小时制</div>
+            </div>
+        </div>
+
+        <!-- 系统功能开关 -->
+        <div class="settings-group">
+            <h3>系统功能开关</h3>
+            <div class="setting-item">
+                <span class="setting-label">待机自动断电</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">告警声音</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">数据自动备份</span>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 外观设置 -->
+        <div class="settings-group">
+            <h3>外观设置</h3>
+            <div class="setting-item">
+                <span class="setting-label">主题选择</span>
+                <span class="setting-value">深色</span>
+            </div>
+            <div class="setting-radio-group">
+                <div class="setting-radio">深色</div>
+                <div class="setting-radio active">浅色</div>
+                <div class="setting-radio">自动</div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">语言选择</span>
+                <span class="setting-value">中文</span>
+            </div>
+            <div class="setting-radio-group">
+                <div class="setting-radio active">中文</div>
+                <div class="setting-radio">English</div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">字体大小</span>
+                <span class="setting-value">中</span>
+            </div>
+            <div class="setting-radio-group">
+                <div class="setting-radio">小</div>
+                <div class="setting-radio active">中</div>
+                <div class="setting-radio">大</div>
+            </div>
+        </div>
+
+        <!-- 设备管理 -->
+        <div class="settings-group">
+            <h3>设备管理</h3>
+            <div class="device-item">
+                <div class="device-info">
+                    <div class="device-name">ESP32-A</div>
+                    <div class="device-status online">在线 - 固件版本: v1.0.0</div>
+                </div>
+                <span class="setting-arrow">›</span>
+            </div>
+            <div class="device-item">
+                <div class="device-info">
+                    <div class="device-name">ESP32-B</div>
+                    <div class="device-status online">在线 - 固件版本: v1.0.0</div>
+                </div>
+                <span class="setting-arrow">›</span>
+            </div>
+            <div class="device-item">
+                <div class="device-info">
+                    <div class="device-name">MPPT模块</div>
+                    <div class="device-status offline">离线 - 固件版本: v1.0.0</div>
+                </div>
+                <span class="setting-arrow">›</span>
+            </div>
+        </div>
+
+        <!-- 关于与帮助 -->
+        <div class="settings-group">
+            <h3>关于与帮助</h3>
+            <div class="about-item">
+                <span class="setting-label">系统版本</span>
+                <span class="setting-value">v1.0.0</span>
+            </div>
+            <div class="about-item">
+                <span class="setting-label">使用帮助</span>
+                <span class="setting-arrow">›</span>
+            </div>
+            <div class="about-item">
+                <span class="setting-label">隐私政策</span>
+                <span class="setting-arrow">›</span>
+            </div>
+            <div class="about-item">
+                <span class="setting-label">开源协议声明</span>
+                <span class="setting-arrow">›</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 单选按钮组功能
+        const radioGroups = document.querySelectorAll('.setting-radio-group');
+        radioGroups.forEach(group => {
+            const radios = group.querySelectorAll('.setting-radio');
+            radios.forEach(radio => {
+                radio.addEventListener('click', () => {
+                    radios.forEach(r => r.classList.remove('active'));
+                    radio.classList.add('active');
+                });
+            });
+        });
+
+        // 滑块功能
+        const sliders = document.querySelectorAll('.setting-slider');
+        sliders.forEach(slider => {
+            slider.addEventListener('input', function() {
+                const value = this.value;
+                const settingItem = this.previousElementSibling;
+                const valueElement = settingItem.querySelector('.setting-value');
+                if (valueElement) {
+                    valueElement.textContent = `${value}瓦`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
